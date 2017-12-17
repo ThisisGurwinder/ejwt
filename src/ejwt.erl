@@ -10,6 +10,7 @@
 -export([parse_jwt_iss_sub/2]).
 -export([jwt/3, jwt/4]).
 -export([jwt_hs256_iss_sub/4]).
+-export([jwt_hs512_iss_sub/4]).
 
 jiffy_decode_safe(Bin) ->
     R = try jiffy:decode(Bin) of Jterm0 -> Jterm0 catch Err -> Err end,
@@ -139,8 +140,18 @@ jwt_hs256_iss_sub(Iss, Sub, ExpirationSeconds, Key) ->
         {<<"sub">>, Sub}
     ]}, ExpirationSeconds, Key).
 
+
+jwt_hs512_iss_sub(Iss, Sub, ExpirationSeconds, Key) ->
+    jwt(<<"HS512">>, {[
+        {<<"iss">>, Iss},
+        {<<"sub">>, Sub}
+    ]}, ExpirationSeconds, Key).
+
 jwt_sign(<<"HS256">>, Payload, Key) ->
     base64url:encode(crypto:hmac(sha256, Key, Payload));
+
+jwt_sign(<<"HS512">>, Payload, Key) ->
+    base64url:encode(crypto:hmac(sha512, Key, Payload));
 
 jwt_sign(_, _, _) ->
     alg_not_supported.
